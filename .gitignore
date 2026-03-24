@@ -1,0 +1,32 @@
+# Entorno Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+.venv/
+venv/
+env/
+
+# Base de datos local SQLite (NO subir al repo)
+*.db
+*.db-shm
+*.db-wal
+
+# Variables de entorno sensibles (NO subir al repo)
+.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini

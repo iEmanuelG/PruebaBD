@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Holcim MDM — Datos Maestros</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="/static/style.css"/>
+</head>
+<body>
+
+<!-- ═══════════════════════════ LOGIN SCREEN ══════════════════════════════ -->
+<div id="login-screen" class="login-screen">
+  <div class="login-bg"></div>
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="logo-icon"><i class="fa-solid fa-database"></i></div>
+      <div>
+        <h1>Holcim MDM</h1>
+        <p>Gestión de Datos Maestros</p>
+      </div>
+    </div>
+    <div id="login-error" class="alert alert-error hidden"></div>
+    <form id="login-form">
+      <div class="form-group">
+        <label>Usuario</label>
+        <div class="input-icon">
+          <i class="fa-solid fa-user"></i>
+          <input type="text" id="login-username" placeholder="admin" required autocomplete="username"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Contraseña</label>
+        <div class="input-icon">
+          <i class="fa-solid fa-lock"></i>
+          <input type="password" id="login-password" placeholder="••••••••" required autocomplete="current-password"/>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary btn-full" id="login-btn">
+        <span>Ingresar</span>
+        <i class="fa-solid fa-arrow-right-to-bracket"></i>
+      </button>
+    </form>
+    <div class="login-hint">
+      <small>Demo: <code>admin / admin123</code> · <code>editor1 / editor123</code> · <code>viewer1 / viewer123</code></small>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ MAIN APP ═════════════════════════════════ -->
+<div id="app" class="app hidden">
+
+  <!-- Sidebar -->
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo-icon small"><i class="fa-solid fa-database"></i></div>
+      <div class="sidebar-title">
+        <span class="brand">Holcim MDM</span>
+        <span class="brand-sub">Datos Maestros</span>
+      </div>
+      <button class="sidebar-toggle" id="sidebar-toggle"><i class="fa-solid fa-bars"></i></button>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Principal</div>
+      <a href="#" class="nav-item active" data-page="dashboard">
+        <i class="fa-solid fa-gauge-high"></i><span>Dashboard</span>
+      </a>
+      <a href="#" class="nav-item" data-page="suppliers">
+        <i class="fa-solid fa-building"></i><span>Proveedores</span>
+        <span class="nav-badge" id="suppliers-count">0</span>
+      </a>
+
+      <div class="nav-section-label">Sistema</div>
+      <a href="#" class="nav-item" data-page="audit">
+        <i class="fa-solid fa-clock-rotate-left"></i><span>Audit Log</span>
+      </a>
+      <a href="#" class="nav-item admin-only hidden" data-page="users">
+        <i class="fa-solid fa-users-gear"></i><span>Usuarios</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-info" id="sidebar-user">
+        <div class="user-avatar" id="user-avatar-letter">A</div>
+        <div class="user-details">
+          <span id="sidebar-username" class="user-name">—</span>
+          <span id="sidebar-role" class="role-badge">—</span>
+        </div>
+      </div>
+      <button class="btn-icon logout-btn" id="logout-btn" title="Cerrar sesión">
+        <i class="fa-solid fa-right-from-bracket"></i>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main content -->
+  <main class="main-content" id="main-content">
+
+    <!-- ── Dashboard ─────────────────────────────── -->
+    <section id="page-dashboard" class="page">
+      <div class="page-header">
+        <h2>Dashboard</h2>
+        <span class="page-subtitle">Vista general del sistema</span>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card" style="--accent:#6C63FF">
+          <div class="stat-icon"><i class="fa-solid fa-building"></i></div>
+          <div class="stat-info">
+            <span class="stat-value" id="stat-total">—</span>
+            <span class="stat-label">Total Proveedores</span>
+          </div>
+        </div>
+        <div class="stat-card" style="--accent:#22D3A5">
+          <div class="stat-icon"><i class="fa-solid fa-circle-check"></i></div>
+          <div class="stat-info">
+            <span class="stat-value" id="stat-active">—</span>
+            <span class="stat-label">Activos</span>
+          </div>
+        </div>
+        <div class="stat-card" style="--accent:#F59E0B">
+          <div class="stat-icon"><i class="fa-solid fa-clock"></i></div>
+          <div class="stat-info">
+            <span class="stat-value" id="stat-pending">—</span>
+            <span class="stat-label">Pendientes</span>
+          </div>
+        </div>
+        <div class="stat-card" style="--accent:#EF4444">
+          <div class="stat-icon"><i class="fa-solid fa-circle-xmark"></i></div>
+          <div class="stat-info">
+            <span class="stat-value" id="stat-inactive">—</span>
+            <span class="stat-label">Inactivos</span>
+          </div>
+        </div>
+      </div>
+      <div class="dashboard-grid">
+        <div class="card">
+          <div class="card-header"><h3>Últimas Actividades</h3></div>
+          <div id="audit-preview" class="audit-list-mini"></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>Proveedores por Categoría</h3></div>
+          <div id="category-breakdown" class="category-list"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Suppliers Page ─────────────────────────  -->
+    <section id="page-suppliers" class="page hidden">
+      <div class="page-header">
+        <div>
+          <h2>Proveedores</h2>
+          <span class="page-subtitle">Gestión del dato maestro de proveedores</span>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-secondary" id="btn-import-csv" title="Importar CSV">
+            <i class="fa-solid fa-file-import"></i> Importar CSV
+          </button>
+          <button class="btn btn-primary editor-only hidden" id="btn-new-supplier">
+            <i class="fa-solid fa-plus"></i> Nuevo Proveedor
+          </button>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="filter-bar">
+        <div class="search-box">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" id="search-input" placeholder="Buscar por nombre o NIT..." />
+        </div>
+        <select id="filter-status" class="select-filter">
+          <option value="">Todos los estados</option>
+          <option value="Activo">Activo</option>
+          <option value="Pendiente">Pendiente</option>
+          <option value="Inactivo">Inactivo</option>
+        </select>
+        <select id="filter-category" class="select-filter">
+          <option value="">Todas las categorías</option>
+          <option value="Bienes">Bienes</option>
+          <option value="Servicios">Servicios</option>
+          <option value="Logística">Logística</option>
+          <option value="Mixto">Mixto</option>
+        </select>
+        <button class="btn btn-secondary" id="btn-clear-filters">
+          <i class="fa-solid fa-xmark"></i> Limpiar
+        </button>
+      </div>
+
+      <!-- Table -->
+      <div class="card table-card">
+        <div id="suppliers-loading" class="loading-state"><div class="spinner"></div></div>
+        <div id="suppliers-empty" class="empty-state hidden">
+          <i class="fa-solid fa-box-open"></i>
+          <p>No se encontraron proveedores</p>
+        </div>
+        <div id="suppliers-table-wrap" class="hidden">
+          <table class="data-table" id="suppliers-table">
+            <thead>
+              <tr>
+                <th>Razón Social</th>
+                <th>NIT</th>
+                <th>País / Ciudad</th>
+                <th>Categoría</th>
+                <th>Estado</th>
+                <th>Contacto</th>
+                <th class="actions-col">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="suppliers-tbody"></tbody>
+          </table>
+          <div class="pagination" id="suppliers-pagination"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Audit Log Page ─────────────────────────  -->
+    <section id="page-audit" class="page hidden">
+      <div class="page-header">
+        <div>
+          <h2><i class="fa-solid fa-clock-rotate-left"></i> Audit Log</h2>
+          <span class="page-subtitle">Historial completo de cambios en el sistema</span>
+        </div>
+      </div>
+      <div class="filter-bar">
+        <select id="audit-filter-action" class="select-filter">
+          <option value="">Todas las acciones</option>
+          <option value="CREATE">Creación</option>
+          <option value="UPDATE">Modificación</option>
+          <option value="DELETE">Eliminación</option>
+        </select>
+      </div>
+      <div class="card table-card">
+        <div id="audit-loading" class="loading-state"><div class="spinner"></div></div>
+        <div id="audit-empty" class="empty-state hidden"><i class="fa-solid fa-scroll"></i><p>Sin registros aún</p></div>
+        <div id="audit-table-wrap" class="hidden">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Fecha/Hora</th>
+                <th>Usuario</th>
+                <th>Acción</th>
+                <th>Proveedor</th>
+                <th>Campo</th>
+                <th>Valor Anterior</th>
+                <th>Valor Nuevo</th>
+              </tr>
+            </thead>
+            <tbody id="audit-tbody"></tbody>
+          </table>
+          <div class="pagination" id="audit-pagination"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Users Page ─────────────────────────────  -->
+    <section id="page-users" class="page hidden">
+      <div class="page-header">
+        <div>
+          <h2><i class="fa-solid fa-users-gear"></i> Gestión de Usuarios</h2>
+          <span class="page-subtitle">Solo visible para administradores</span>
+        </div>
+        <button class="btn btn-primary" id="btn-new-user">
+          <i class="fa-solid fa-user-plus"></i> Nuevo Usuario
+        </button>
+      </div>
+      <div class="card table-card">
+        <table class="data-table">
+          <thead>
+            <tr><th>Nombre</th><th>Usuario</th><th>Email</th><th>Rol</th><th>Estado</th></tr>
+          </thead>
+          <tbody id="users-tbody"></tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ═══════════════════════════ MODALS ═══════════════════════════════════ -->
+
+<!-- Supplier Modal -->
+<div id="supplier-modal" class="modal-overlay hidden">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modal-title">Nuevo Proveedor</h3>
+      <button class="btn-icon" id="modal-close"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <form id="supplier-form" class="modal-body">
+      <div id="modal-error" class="alert alert-error hidden"></div>
+      <div class="form-grid">
+        <div class="form-group span-2">
+          <label>Razón Social *</label>
+          <input type="text" name="business_name" required maxlength="200" placeholder="Nombre completo de la empresa"/>
+        </div>
+        <div class="form-group">
+          <label>NIT / ID Tributario *</label>
+          <input type="text" name="nit" required maxlength="20" placeholder="900123456-7"/>
+        </div>
+        <div class="form-group">
+          <label>Categoría *</label>
+          <select name="category" required>
+            <option value="">Seleccionar...</option>
+            <option value="Bienes">Bienes</option>
+            <option value="Servicios">Servicios</option>
+            <option value="Logística">Logística</option>
+            <option value="Mixto">Mixto</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>País *</label>
+          <input type="text" name="country" value="Colombia" required maxlength="50"/>
+        </div>
+        <div class="form-group">
+          <label>Ciudad</label>
+          <input type="text" name="city" maxlength="100" placeholder="Bogotá"/>
+        </div>
+        <div class="form-group span-2">
+          <label>Dirección</label>
+          <input type="text" name="address" maxlength="250" placeholder="Cra 1 # 2-3"/>
+        </div>
+        <div class="form-group">
+          <label>Estado</label>
+          <select name="status">
+            <option value="Pendiente">Pendiente</option>
+            <option value="Activo">Activo</option>
+            <option value="Inactivo">Inactivo</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Nombre del Contacto</label>
+          <input type="text" name="contact_name" maxlength="100" placeholder="Ej: Juan García"/>
+        </div>
+        <div class="form-group">
+          <label>Email del Contacto</label>
+          <input type="email" name="contact_email" placeholder="contacto@empresa.com"/>
+        </div>
+        <div class="form-group">
+          <label>Teléfono</label>
+          <input type="text" name="contact_phone" maxlength="20" placeholder="3001234567"/>
+        </div>
+        <div class="form-group span-2">
+          <label>Notas</label>
+          <textarea name="notes" rows="3" maxlength="1000" placeholder="Observaciones adicionales..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="modal-cancel">Cancelar</button>
+        <button type="submit" class="btn btn-primary" id="modal-save">
+          <i class="fa-solid fa-floppy-disk"></i> Guardar
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Delete Confirm Modal -->
+<div id="delete-modal" class="modal-overlay hidden">
+  <div class="modal modal-sm">
+    <div class="modal-header danger">
+      <h3><i class="fa-solid fa-triangle-exclamation"></i> Confirmar Eliminación</h3>
+      <button class="btn-icon" id="delete-modal-close"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <p>¿Estás seguro de que deseas eliminar el proveedor <strong id="delete-supplier-name"></strong>?</p>
+      <p class="text-muted">Esta acción no se puede deshacer y quedará registrada en el Audit Log.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" id="delete-cancel">Cancelar</button>
+      <button class="btn btn-danger" id="delete-confirm"><i class="fa-solid fa-trash"></i> Eliminar</button>
+    </div>
+  </div>
+</div>
+
+<!-- User Modal -->
+<div id="user-modal" class="modal-overlay hidden">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <h3>Nuevo Usuario</h3>
+      <button class="btn-icon" id="user-modal-close"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <form id="user-form" class="modal-body">
+      <div id="user-modal-error" class="alert alert-error hidden"></div>
+      <div class="form-group">
+        <label>Nombre Completo *</label>
+        <input type="text" name="full_name" required placeholder="Ej: Juan Pérez"/>
+      </div>
+      <div class="form-group">
+        <label>Usuario *</label>
+        <input type="text" name="username" required placeholder="juanperez"/>
+      </div>
+      <div class="form-group">
+        <label>Email *</label>
+        <input type="email" name="email" required placeholder="juan@holcim.com"/>
+      </div>
+      <div class="form-group">
+        <label>Contraseña *</label>
+        <input type="password" name="password" required placeholder="Mínimo 6 caracteres" minlength="6"/>
+      </div>
+      <div class="form-group">
+        <label>Rol *</label>
+        <select name="role" required>
+          <option value="viewer">Viewer — Solo lectura</option>
+          <option value="editor">Editor — Crear y editar</option>
+          <option value="admin">Admin — Acceso total</option>
+        </select>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="user-modal-cancel">Cancelar</button>
+        <button type="submit" class="btn btn-primary">
+          <i class="fa-solid fa-user-plus"></i> Crear Usuario
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Import CSV Modal -->
+<div id="import-modal" class="modal-overlay hidden">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <h3><i class="fa-solid fa-file-import"></i> Importar Proveedores CSV</h3>
+      <button class="btn-icon" id="import-modal-close"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <p class="text-muted">El CSV debe tener las columnas: <code>business_name, nit, country, city, category, status, contact_name, contact_email, contact_phone, address</code></p>
+      <div class="form-group" style="margin-top:1rem">
+        <label>Archivo CSV *</label>
+        <input type="file" id="csv-file-input" accept=".csv"/>
+      </div>
+      <div id="import-result" class="hidden"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" id="import-cancel">Cancelar</button>
+      <button class="btn btn-primary" id="import-confirm">
+        <i class="fa-solid fa-upload"></i> Importar
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="toast hidden"></div>
+
+<input type="file" id="csv-hidden-input" accept=".csv" style="display:none"/>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
